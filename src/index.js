@@ -9,7 +9,7 @@ function readDocumentFromUrl(url, callback) {
     if (this.readyState == 4 && this.status == 200) {
 			callback(this.responseText)
     } else {
-
+		callback(null)
 		}
   }
 
@@ -34,8 +34,12 @@ let itemTypes = [
 	"Bomb",
 	"Key",
 	"Heart",
-	"Lamp",
-	"Weapon"
+	"ConsumableArtifact",
+	"Weapon",
+	"Battery",
+	"Hat",
+	"Pouch",
+	"Scourge"
 ]
 
 function setPageContent(array) {
@@ -43,6 +47,10 @@ function setPageContent(array) {
 }
 
 function translate(key) {
+	if (!locale) {
+		return "404"
+	}
+	
 	var v = locale[key]
 
 	if (v) {
@@ -56,45 +64,66 @@ readDocumentFromUrl("https://raw.githubusercontent.com/egordorichev/BurningWiki/
 	locale = JSON.parse(text)
 
 	readDocumentFromUrl("https://raw.githubusercontent.com/egordorichev/BurningWiki/master/data/items/items.json", function(text) {
-		itemData = JSON.parse(text)
+		if (text == null) {
+			setPageContent([ "Failed to load item data" ])
+			return
+		}
 
+		itemData = JSON.parse(text)
 		let item = getUrlParameter("item")
 
 		if (item) {
-			var data = itemData[item]
+			readDocumentFromUrl(`https://raw.githubusercontent.com/egordorichev/BurningWiki/master/data/items/${item}.md`, function(text) {
+							
 
-			if (!data) {
-				setPageContent([ `Unknown item ${item}` ])
-				return
-			}
+				var data = itemData[item]
 
-			let page = [ "<table>"]
-			console.log(data)
-
-			page.push(`<tr><th>Name</th><th>${translate(item)}</th></tr>`)
-			page.push(`<tr><th>Description</th><th>${translate(item + "_desc")}</th></tr>`)
-			page.push(`<tr><th>Type</th><th>${itemTypes[data.type]}</th></tr>`)
-			page.push(`<tr><th>Use time</th><th>${data.time}</th></tr>`)
-			page.push(`<tr><th>ID</th><th>${item}</th></tr>`)
-
-			page.push("</table>")
-
-			page.push("###### Can be found in<br/>")
-
-			if (data.uses) {
-				page.push("###### Uses<br/>")
-
-				for (var use in data.uses) {
-					page.push(`* ${use.id}`)
+				if (!data) {
+					setPageContent([ `Unknown item ${item}` ])
+					return
 				}
-			}
 
-			if (data.renderer) {
-				page.push("###### Renderer<br/>")
-				page.push(`${data.renderer.id}`)
-			}
+				let page = [ `<h1>${translate(item)}</h1><table>`]
 
-			setPageContent(page)
+				page.push(`<tr><th>Name</th><th>${translate(item)}</th></tr>`)
+				page.push(`<tr><th>Description</th><th>${translate(item + "_desc")}</th></tr>`)
+				page.push(`<tr><th>Type</th><th>${itemTypes[data.type]}</th></tr>`)
+				page.push(`<tr><th>Use time</th><th>${data.time}</th></tr>`)
+				page.push(`<tr><th>ID</th><th>${item}</th></tr>`)
+
+				page.push("</table>")
+
+				if (text != null) {
+					page.push(text)
+				}
+
+				if (data.pools) {
+					page.push("<h4>Can be found in</h4>")
+
+					for (var pool in data.pools) {
+						page.push(`* ${pool}`)
+					}
+				}
+
+				if (data.uses && data.uses.length > 0) {
+					page.push("<h4>Uses</h4><ul>")
+
+					for (var i = 0; i < data.uses.length; i++) {
+						var use = data.uses[i]
+						page.push(`<li>${use.id}</li>`)
+					}
+
+					page.push("</ul>")
+				}
+
+				if (data.renderer) {
+					page.push("<h4>Renderer</h4>")
+					page.push(`${data.renderer.id}`)
+				}
+
+				setPageContent(page)
+			})
+
 			return
 		}
 
