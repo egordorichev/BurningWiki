@@ -136,12 +136,18 @@ readDocumentFromUrl("https://raw.githubusercontent.com/egordorichev/BurningWiki/
 			if (sortType && sortType != data.type) {
 				continue
 			}
+			
+			var type = data.type
+			
+			if (type == undefined) {
+				type = 0	
+			}
 
 			page.push("<tr>")
 
 			page.push(`<th><a href="?item=${key}">${key}</a></th>`)
 			page.push(`<th>${translate(key)}</th>`)
-			page.push(`<th><a href="?type=${data.type}">${itemTypes[data.type]}</a></th>`)
+			page.push(`<th><a href="?type=${type}">${itemTypes[type]}</a></th>`)
 			page.push(`<th>${translate(key + "_desc")}</th>`)
 
 			page.push("</tr>")
