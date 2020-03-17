@@ -23,7 +23,8 @@ def rgb(img):
             count += 1 
     return [(r/count), (g/count), (b/count), count]
 
-for i in range(len(data)):
+l = len(data)
+for i in range(l):
     item = data[i]
     if item["name"][-3:] == "png":
         print(item["name"])
@@ -32,7 +33,11 @@ for i in range(len(data)):
         rgb_data = rgb(image)
         hls = colorsys.rgb_to_hls(rgb_data[0], rgb_data[1], rgb_data[2])
         
-        gen_json += "\"" + item["name"][:-4] + "\": " + str(hls[0]) + ",\n"
+        gen_json += "\"" + item["name"][:-4] + "\": " + str(hls[0])
+        if i == l - 1:
+            gen_json += "\n"
+        else:
+            gen_json += ",\n"
 
 gen_json += "}"
 f = open("data/color.json","w+")
