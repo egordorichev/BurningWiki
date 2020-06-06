@@ -1,2 +1,2 @@
 # BurningWiki
-The official Burning Knight wiki
+The official Burning Knight wiki data
