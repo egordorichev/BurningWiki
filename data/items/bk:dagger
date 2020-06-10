@@ -1,0 +1,1 @@
+A simple weapon, like the sword, but shorter and faster.
